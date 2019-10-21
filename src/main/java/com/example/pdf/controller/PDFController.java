@@ -3,7 +3,9 @@ package com.example.pdf.controller;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.itextpdf.text.pdf.qrcode.ByteArray;
+import com.itextpdf.tool.xml.XMLWorkerHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
@@ -26,7 +28,8 @@ import java.nio.file.Paths;
 @RequestMapping("/downloads")
 public class PDFController {
     private static final String EXTERNAL_FILE_PATH = "C:/Users/AprajitaBajpai/Downloads/";
-
+    @Value("${html}")
+    private String html;
 //method written for downloading file
     @RequestMapping("/file/{fileName:.+}")
     public ResponseEntity<ByteArrayResource> downloadPDFResource(HttpServletRequest request, HttpServletResponse response,
@@ -75,6 +78,23 @@ public class PDFController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + "loan.pdf" + "\"")
                 .body(new ByteArrayResource(out.toByteArray()));
 
+}
+
+@RequestMapping("/htmlPdf")
+    public ResponseEntity<ByteArrayResource> htmlToPdf() throws DocumentException, IOException {
+    Document document = new Document();
+    ByteArrayOutputStream out=new ByteArrayOutputStream();
+    PdfWriter writer = PdfWriter.getInstance(document, out);
+    StringReader sr = new StringReader(html+"**********************************************************");
+    System.out.println(html);
+    document.open();
+    XMLWorkerHelper.getInstance().parseXHtml(writer, document,sr );
+
+    document.close();
+    return ResponseEntity.ok()
+            .contentType(MediaType.parseMediaType("application/pdf"))
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + "loan.pdf" + "\"")
+            .body(new ByteArrayResource(out.toByteArray()));
 }
 
 
